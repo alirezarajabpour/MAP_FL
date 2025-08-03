@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'flower-clients'
+    static_configs:
+      # A static list of clients. DNS discovery is more advanced.
+      - targets:
+        - 'client1:8000'
+        - 'client2:8000'
+        - 'client3:8000'
+        # Add all 30 clients here

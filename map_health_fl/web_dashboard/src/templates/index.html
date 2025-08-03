@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>MAP-Health: Federated Diagnosis</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        .container { max-width: 600px; margin: auto; }
+        #result { margin-top: 1em; }
+        #result_img { max-width: 200px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MAP-Health Diagnostic Demo</h1>
+        <p>Upload a medical image to get a diagnosis from the globally aggregated federated model.</p>
+        <form id="upload-form">
+            <input type="file" id="file-input" name="file" accept="image/*" required>
+            <button type="submit">Predict</button>
+        </form>
+        <div id="result">
+            <h3>Prediction: <span id="prediction-text"></span></h3>
+            <img id="result_img" src="" alt="Uploaded Image" style="display:none;"/>
+        </div>
+    </div>
+    <script>
+        const form = document.getElementById('upload-form');
+        const fileInput = document.getElementById('file-input');
+        const predictionText = document.getElementById('prediction-text');
+        const resultImg = document.getElementById('result_img');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            predictionText.textContent = "Processing...";
+            resultImg.style.display = 'none';
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                predictionText.textContent = `Error: ${data.error}`;
+            } else {
+                predictionText.textContent = data.prediction;
+                resultImg.src = `data:image/jpeg;base64,${data.image}`;
+                resultImg.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

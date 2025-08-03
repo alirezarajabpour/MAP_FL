@@ -1,0 +1,103 @@
+version: '3.8'
+
+volumes:
+  shared_model:
+
+services:
+  server:
+    build: ./flower_server
+    container_name: flower-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - shared_model:/model
+
+
+  client1:
+    build: ./flower_client
+    environment:
+      - CLIENT_ID=1
+      - FLOWER_SERVER_ADDRESS=server:8080
+    volumes:
+      - ./data/client_1:/app/data/client_1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ports:
+      - "8001:8000"
+    depends_on: [server]
+
+    
+  client2:
+    build: ./flower_client
+    environment:
+      - CLIENT_ID=2
+      - FLOWER_SERVER_ADDRESS=server:8080
+    volumes:
+      - ./data/client_2:/app/data/client_2
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ports:
+      - "8002:8000"
+    depends_on: [server]
+
+
+  client3:
+    build: ./flower_client
+    environment:
+      - CLIENT_ID=3
+      - FLOWER_SERVER_ADDRESS=server:8080
+    volumes:
+      - ./data/client_3:/app/data/client_3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ports:
+      - "8003:8000"
+    depends_on: [server]
+
+    
+  # Add more clients here (up to 30) by copying the block above
+
+  prometheus:
+    image: docker.arvancloud.ir/prom/prometheus:v2.47.2
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - client1
+      - client2
+      - client3
+
+  grafana:
+    image: docker.arvancloud.ir/grafana/grafana:10.2.2
+    container_name: grafana
+    volumes:
+      - ./monitoring/grafana_provisioning/:/etc/grafana/provisioning/
+    ports:
+      - "3000:3000"
+    depends_on: [prometheus]
+
+  webapp:
+    build: ./web_dashboard
+    container_name: web-dashboard
+    ports:
+      - "5001:5000"
+    volumes:
+      - shared_model:/model
+    depends_on: [server]

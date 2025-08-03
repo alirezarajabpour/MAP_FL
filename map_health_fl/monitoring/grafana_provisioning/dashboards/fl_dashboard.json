@@ -1,0 +1,36 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "annotations": { "list": [] },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "title": "Average Client Accuracy",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "avg(flower_client_accuracy)",
+          "legendFormat": "Avg. Accuracy"
+        }
+      ]
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "Average Client Loss",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "avg(flower_client_loss)",
+          "legendFormat": "Avg. Loss"
+        }
+      ]
+    }
+  ],
+  "title": "Flower MAP Health Dashboard",
+  "version": 0
+}
